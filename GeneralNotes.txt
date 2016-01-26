@@ -1,0 +1,30 @@
+pid :- On specific product page
+
+//*[@id="products"]/div[1]/div[3]/div[2]/div 
+div class = product-unit unit-3 browse-product new-design  quickview-required   data-pid=""
+http://www.flipkart.com/poppins-baby-boy-s-sleepsuit/p/itmecrrnkc7h5k4p?pid=BOLECRRN3KQ6GGFD&al=9roOA%2B0hKxPKyjdTni4f8sldugMWZuE7mxWx381qOwQlSQEcjGmQ1lokUk8v8ukeGLHX1QraWUA%3D&ref=L%3A-7927018693483541184&srno=b_5&findingMethod=Menu
+
+
+a data-tracking-id="prd_img" onhover
+a tag class = quickview-btn
+<a> tag shortlist-btn
+<div> pu-sizes
+<div> pu-offer-box
+
+Get all child a and div tags for div class="pu-visual-section"
+Leave a data-tracking-id="prd_img"
+Delete all others
+
+
+Write about the objective of your hack.
+The objective of this project is to let users keep a track of their thoughts about various products so that they need not start from scratch
+searching for the best products but can just resume from where they left the decision via previous notes
+What you had dreamt of and what you have built.
+I do not buy products in a single go. I generally prefer to search for the best product which can offer me 
+a balance between cost, reviews and other such factors. So I generally forget what I did or what I thought last time I was browsing for a product 
+in a category. So I have build a chrome extension specifically for Flipkart in this case which will help users to keep track of their thoughts
+and later view them or search their custom notes.
+
+Also mention how you plan to improve it beyond the hackathon
+As of these notes are on the user localstorage the obvious extension of this project is to take this data on server and 
+do apply NLP to understand what exactly does a customer want from a product.

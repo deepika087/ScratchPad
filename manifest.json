@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+
+  "name": "ScratchPad",
+  "description": "Extension will help you to remember your thoughts while shopping",
+  "version": "1.0",
+
+  "icons":  {
+      "16"  : "flipkart.png",
+      "48"  : "flipkart.png",
+      "128" : "flipkart.png" 
+      },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
+  "content_scripts": [
+    {
+      "matches": ["http://www.flipkart.com/*","https://www.flipkart.com/*" ],
+      "js": ["js/jquery.js", "content.js"],
+      "css" : ["css/hint.min.css", "css/style.css"],
+	    "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+ 
+  "permissions": ["tabs", "background", "storage"],
+  "browser_action": {
+    "default_title": "Extension will help you to remember your thoughts while shopping",
+    "default_icon": "flipkart.png"
+  }		
+}
