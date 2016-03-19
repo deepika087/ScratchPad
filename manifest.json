@@ -16,14 +16,14 @@
   "content_scripts": [
     {
       "matches": ["http://www.flipkart.com/*","https://www.flipkart.com/*" ],
-      "js": ["js/jquery.js", "content.js"],
+      "js": ["js/jquery.js", "content.js", "js/client.js"],
       "css" : ["css/hint.min.css", "css/style.css"],
 	    "run_at": "document_start",
       "all_frames": true
     }
   ],
  
-  "permissions": ["tabs", "background", "storage"],
+  "permissions": ["tabs", "background", "storage", "http://*/*", "https://*/*"],
   "browser_action": {
     "default_title": "Extension will help you to remember your thoughts while shopping",
     "default_icon": "flipkart.png"

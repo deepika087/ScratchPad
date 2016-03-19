@@ -6,6 +6,16 @@ $(document).ready(function(){
 	var url = document.URL;
 	var searchPagePattern = "sid";
 	var productPagePattern = "pid";
+	var friendHelpActivated = "No";
+
+	var list = [
+	    { 'name': 'Sanya', 'comment': 'I didnt like the product color' },
+	    { 'name': 'Deepika', 'comment': 'Looks better than others' },
+	    { 'name': 'Rohit', 'comment': 'Way too expensive' },
+	    { 'name': 'Manpreet', 'comment': 'Image is not clear' },
+	    { 'name': 'Taran', 'comment': 'Available at cheaper rate on amazon' },
+		{ 'name': 'Pavan', 'comment': 'Mixed review. No clear winner' }
+	];
 
 	/*
 		Execute the following code if the page contains multiple items that is the page is actually a search page not a specific product page.
@@ -23,15 +33,22 @@ $(document).ready(function(){
 			console.log("Note Retrived for pid = " + pid + " is = " + notesRetrieved);
 			
 			//3. Prepare + attach the Tool Tip for notes retrieved corresponding to a pid
-			if ( notesRetrieved != null && notesRetrieved.length > 0 && notesRetrieved !== 'null') {
-				$(this).wrap("<div class='hint--top hint--bounce' data-hint=" + notesRetrieved + "> </div>");	
-			}  
+			if (Boolean(friendHelpActivated === "No")) {
+				if ( notesRetrieved != null && notesRetrieved.length > 0 && notesRetrieved !== 'null') {
+					$(this).wrap("<div class='hint--top hint--bounce' data-hint=" + notesRetrieved + "> </div>");	
+				}  
+			} else {
+				var randomNumber = Math.floor((Math.random() * list.length-1) + 1);
+				console.log("Message of friend is : " + list[randomNumber].comment );
+				var tempVar = "\'" + list[randomNumber].name + ':' + list[randomNumber].comment + "\'";
+				$(this).wrap("<div class='hint--top hint--bounce hint--error' data-hint=" + tempVar + "> </div>");	
+			}
 		}, function() {
 			/*
 				This part will be executed on hover out. 
 				Therefore clean up the tooptip data.
 			*/
-			if ($('#viewAllNotes').checked == false) {
+			if (Boolean($('#viewAllNotes').checked) == false) {
 				$(this).parents().removeClass('hint--top');
 				$(this).parents().removeClass('hint--bounce');
 				$(this).parents().removeAttr('data-hint');
@@ -51,8 +68,22 @@ $(document).ready(function(){
 		var clearNotesDiv = "<div id='ui'>Clear all Notes <input id='clearAllNotes' name='clearAllNotes' type='checkbox'/></div>";
 		$("#feedbackbox").append(clearNotesDiv);
 
+		var friendHelp = "<div id='ui'>Friend Help <input id='friendHelp' name='friendHelp' type='checkbox'/></div>";
+		$("#feedbackbox").append(friendHelp);
+
+		var friendAdvice = "<div id='ui'>Ask on Twitter <input id='friendAdvice' name='friendAdvice' type='checkbox'/></div>";
+		$("#feedbackbox").append(friendAdvice);
+
 		var searchNotesDiv = "<div id='searchBox'><input style='background-color:yellow;margin-bottom:10px;width:160px;height:25px;font-size:13px' type='text' name='searchNotes' id='searchNotes' placeholder='Enter keywords....'/></div>";
 		$("#feedbackbox").append(searchNotesDiv);
+
+		$('#friendHelp').change(function(event) {
+			if (this.checked) {
+				friendHelpActivated = "Yes";
+			} else {
+				friendHelpActivated = "No";
+			}
+		});
 
 		/*
 			5. Now attach events with each functionality
@@ -61,6 +92,8 @@ $(document).ready(function(){
 				c.) To search for notes
 					c.1.) Trigger search when user hits enter
 					c.2.) Before processing new search clear the old tooltips + uncheck ViewAllNotes & ClearAllNotes checkbox.
+				d.) activating friend advice, will show the comments as written by your friend not your own comments.
+				e.) Ask on twitter, will post the query on twitter via Java api.
 		*/
 		$('#viewAllNotes').change(function(event) {
 			if (this.checked) {
@@ -116,6 +149,86 @@ $(document).ready(function(){
 				$(this).parents().removeClass('hint--bounce');
 				$(this).parents().removeAttr('data-hint');
 			});
+		});
+
+		$('#friendAdvice').change(function(event) {
+			if (this.checked) {
+				var data = [];
+				console.log("Request to share on twitter initiated");
+				$('.product-unit.unit-3.browse-product.new-design ').each(function(index, el) {
+					//console.log("Product ID: " + index + " " + $(this).attr('data-pid'));
+					var userNote = localStorage.getItem($(this).attr('data-pid'));
+					if (userNote != null && userNote.length > 0 && userNote !== 'null') {
+						var prodTitle = $(this).find("img").attr("alt");
+						var prodURL = "http://flipkart.com" + $(this).find("a").first().attr('href');
+						
+						/**
+							Invoke URL shortner API
+						**/
+						var url = 'https://www.googleapis.com/urlshortener/v1/url';
+						var key = 'AIzaSyCmN5_GBbpl1HY2cpYeFQxYAezI2dap5YA';
+						var urlComplete = url;
+						urlComplete += '?key=' + key;
+
+						var	xmlhttp = new XMLHttpRequest();
+						xmlhttp.open('POST', urlComplete, false);
+						xmlhttp.setRequestHeader('Content-Type', 'application/json');
+
+						xmlhttp.onreadystatechange = function()
+						{
+							if(xmlhttp.readyState == 4 && xmlhttp.status != 0) 
+							{
+								var response = JSON.parse(xmlhttp.responseText);
+
+								if(response.id == undefined)
+								{
+									if(response.error.code == '401')
+										console.log("Error1");
+								}
+								else	
+								{
+									console.log("Success1");
+								}
+							}
+						}
+						var longUrl = prodURL;
+						xmlhttp.send(JSON.stringify({'longUrl': longUrl}));	
+						var myArr = JSON.parse(xmlhttp.responseText);
+						console.log("URL shortened : " + myArr.id);
+
+						var node = new Object();
+						node.userName = myArr.id;
+						node.tweetText = userNote;
+						data.push(node);
+					}
+				});
+
+				console.log("Final Data" + JSON.stringify(data));
+
+				$.ajax({
+					url: 'http://localhost:8080/tweet',
+					type: 'POST',
+					dataType: 'json',
+					data: JSON.stringify(data),
+					crossDomain: true,
+					contentType:'application/json',
+					accept: 'applciation/text'
+				})
+				.done(function(msg) {
+					console.log("success" + msg);
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.log("error" + jqXHR, errorThrown);
+				})
+				.always(function() {
+					console.log("complete");
+				});
+
+				
+
+			} else {
+				console.log("Twitter unchecked");
+			}
 		});
 
 	} else if (url.search(productPagePattern) > 0) { //Now process a particular product page
